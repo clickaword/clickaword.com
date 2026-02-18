@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Click-A-Word — Learn a language by clicking drifting icons</title>
+  <meta name="description" content="Click-A-Word is a fast, visual vocabulary game. Icons drift across the screen—click the one that matches the foreign word." />
+  <meta name="theme-color" content="#0b1220" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Click-A-Word" />
+  <meta property="og:description" content="Learn a language by clicking drifting icons that match the foreign word." />
+  <meta property="og:url" content="https://clickaword.com/" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    :root{
+      --bg0:#070b14;
+      --bg1:#0b1220;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.08);
+      --text:#eaf0ff;
+      --muted:rgba(234,240,255,.72);
+      --line:rgba(255,255,255,.12);
+      --accent:#7c5cff;
+      --accent2:#39d98a;
+      --warn:#ffcc66;
+      --shadow: 0 20px 70px rgba(0,0,0,.45);
+      --r: 18px;
+      --max: 1080px;
+      --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+              Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(124,92,255,.28), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(57,217,138,.18), transparent 60%),
+        radial-gradient(900px 900px at 50% 110%, rgba(255,204,102,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    a{color:inherit; text-decoration:none}
+    .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 60px}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius:999px;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand{display:flex; align-items:center; gap:10px}
+    .brand .wordmark{display:flex; flex-direction:column; line-height:1.05}
+    .brand strong{font-size:14px; letter-spacing:.3px}
+    .brand span{font-size:12px; color:var(--muted)}
+    .nav{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .pill{
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      font-size:13px;
+      color:var(--muted);
+    }
+    .pill:hover{background:rgba(255,255,255,.06); color:var(--text)}
+
+    .hero{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    @media (max-width: 920px){
+      .hero{grid-template-columns:1fr}
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .heroLeft{padding:26px 24px 22px}
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(28px, 4vw, 44px);
+      letter-spacing:-.5px;
+    }
+    p{
+      margin:0 0 16px;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+      max-width: 60ch;
+    }
+
+    .ctaRow{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:10px;
+      padding:11px 14px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      font-weight:600;
+      font-size:14px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:hover{background:rgba(255,255,255,.07)}
+    .btnPrimary{
+      border-color: rgba(124,92,255,.5);
+      background: linear-gradient(135deg, rgba(124,92,255,.28), rgba(124,92,255,.08));
+    }
+    .btnPrimary:hover{background: linear-gradient(135deg, rgba(124,92,255,.36), rgba(124,92,255,.12));}
+    .btnGood{
+      border-color: rgba(57,217,138,.5);
+      background: linear-gradient(135deg, rgba(57,217,138,.22), rgba(57,217,138,.08));
+    }
+    .mini{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top:16px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .mini .tag{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    /* Demo area (game mock) */
+    .demo{
+      position:relative;
+      height: 420px;
+      min-height: 420px;
+      background:
+        radial-gradient(500px 320px at 20% 20%, rgba(124,92,255,.22), transparent 60%),
+        radial-gradient(500px 320px at 80% 30%, rgba(57,217,138,.16), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.32));
+    }
+    .demoHeader{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+    }
+    .demoHeader .left{
+      display:flex; gap:10px; align-items:center;
+      font-size:13px; color:var(--muted);
+    }
+    .chip{
+      padding:7px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      color:var(--muted);
+    }
+    .demoStage{
+      position:absolute;
+      left:0; right:0;
+      top:52px; bottom:58px;
+      overflow:hidden;
+    }
+    .foreignBar{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:58px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 14px;
+      border-top:1px solid var(--line);
+      background:rgba(0,0,0,.28);
+    }
+    .foreignWord{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .foreignWord strong{font-size:16px}
+    .foreignWord span{font-size:12px; color:var(--muted)}
+    .hint{
+      font-size:12px; color:var(--muted);
+      display:flex; align-items:center; gap:8px;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:11px;
+      padding:3px 7px;
+      border:1px solid var(--line);
+      border-bottom-color: rgba(255,255,255,.25);
+      border-radius:8px;
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+    }
+
+    /* Drifting icons */
+    .token{
+      position:absolute;
+      width:64px; height:64px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 14px 35px rgba(0,0,0,.28);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transform: translate3d(0,0,0);
+      transition: transform .08s ease;
+      user-select:none;
+    }
+    .token:hover{transform: translate3d(0,0,0) scale(1.04)}
+    .token:active{transform: translate3d(0,0,0) scale(.98)}
+    .emoji{font-size:30px; line-height:1}
+    .label{
+      position:absolute;
+      left:50%; top:66px;
+      transform: translateX(-50%);
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.25);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    /* drift animation uses CSS variables */
+    @keyframes drift {
+      0%   { transform: translate(var(--x0), var(--y0)) }
+      50%  { transform: translate(var(--x1), var(--y1)) }
+      100% { transform: translate(var(--x0), var(--y0)) }
+    }
+    .drift{
+      animation: drift var(--dur) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+
+    /* Lower sections */
+    .grid3{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+    @media (max-width: 920px){
+      .grid3{grid-template-columns:1fr}
+    }
+    .feat{padding:18px}
+    .feat h3{margin:0 0 8px; font-size:15px}
+    .feat p{margin:0; font-size:13px; color:var(--muted)}
+    .footer{
+      margin-top:24px;
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:14px 2px 0;
+    }
+
+    /* SVG helpers */
+    .logoSvg{width:34px; height:34px}
+    .heroArt{width:100%; height:auto; display:block}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <a class="brand" href="https://clickaword.com/" aria-label="Click-A-Word home">
+        <!-- Graphic #1: Simple logo SVG -->
+        <svg class="logoSvg" viewBox="0 0 64 64" role="img" aria-label="Click-A-Word logo">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#7c5cff" stop-opacity="1"/>
+              <stop offset="1" stop-color="#39d98a" stop-opacity="1"/>
+            </linearGradient>
+          </defs>
+          <rect x="8" y="8" width="48" height="48" rx="16" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+          <path d="M22 32c0-7 5-12 12-12s12 5 12 12-5 12-12 12-12-5-12-12z" fill="none" stroke="url(#g)" stroke-width="4"/>
+          <path d="M34 24v8l6 4" fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+
+        <div class="wordmark">
+          <strong>Click-A-Word</strong>
+          <span>Visual vocabulary — click the matching icon</span>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Site">
+        <a class="pill" href="#how">How it works</a>
+        <a class="pill" href="#demo">Demo</a>
+        <a class="pill" href="#faq">FAQ</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="card heroLeft">
+        <h1>Learn a new language by clicking what you see.</h1>
+        <p>
+          Icons drift across the screen. A foreign word appears at the bottom.
+          Your job: click the icon that matches the word — fast, fun, and surprisingly sticky.
+        </p>
+
+        <div class="ctaRow">
+          <a class="btn btnPrimary" href="#demo" aria-label="See the demo">▶︎ Try the demo</a>
+          <a class="btn btnGood" href="#how" aria-label="How it works">✨ How it works</a>
+          <a class="btn" href="mailto:hello@clickaword.com?subject=Click-A-Word%20early%20access" aria-label="Request early access">
+            Request early access
+          </a>
+        </div>
+
+        <div class="mini" role="list" aria-label="Key features">
+          <div class="tag" role="listitem">🧠 Spaced repetition</div>
+          <div class="tag" role="listitem">🎯 Quick rounds</div>
+          <div class="tag" role="listitem">🌍 Any language pair</div>
+          <div class="tag" role="listitem">📱 Phone / tablet / desktop</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <!-- Graphic #2: Hero illustration SVG -->
+        <svg class="heroArt" viewBox="0 0 900 620" role="img" aria-label="Illustration of drifting word icons">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="rgba(124,92,255,.25)"/>
+              <stop offset="1" stop-color="rgba(57,217,138,.18)"/>
+            </linearGradient>
+            <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="10" result="b"/>
+              <feMerge>
+                <feMergeNode in="b"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <rect x="18" y="18" width="864" height="584" rx="26" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.12)"/>
+          <rect x="36" y="36" width="828" height="548" rx="22" fill="url(#bg)" opacity=".9"/>
+          <circle cx="220" cy="180" r="110" fill="rgba(255,255,255,.10)" filter="url(#soft)"/>
+          <circle cx="670" cy="240" r="140" fill="rgba(0,0,0,.10)" filter="url(#soft)"/>
+
+          <!-- floating tiles -->
+          <g opacity=".95">
+            <g transform="translate(150 150)">
+              <rect width="96" height="96" rx="22" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.14)"/>
+              <text x="48" y="62" text-anchor="middle" font-size="44">🍎</text>
+              <text x="48" y="120" text-anchor="middle" font-size="14" fill="rgba(255,255,255,.70)">apple</text>
+            </g>
+            <g transform="translate(420 120)">
+              <rect width="96" height="96" rx="22" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.14)"/>
+              <text x="48" y="62" text-anchor="middle" font-size="44">🐶</text>
+              <text x="48" y="120" text-anchor="middle" font-size="14" fill="rgba(255,255,255,.70)">dog</text>
+            </g>
+            <g transform="translate(610 310)">
+              <rect width="96" height="96" rx="22" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.14)"/>
+              <text x="48" y="62" text-anchor="middle" font-size="44">🚗</text>
+              <text x="48" y="120" text-anchor="middle" font-size="14" fill="rgba(255,255,255,.70)">car</text>
+            </g>
+            <g transform="translate(310 340)">
+              <rect width="96" height="96" rx="22" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.14)"/>
+              <text x="48" y="62" text-anchor="middle" font-size="44">🏠</text>
+              <text x="48" y="120" text-anchor="middle" font-size="14" fill="rgba(255,255,255,.70)">house</text>
+            </g>
+          </g>
+
+          <!-- bottom word bar -->
+          <g transform="translate(64 486)">
+            <rect width="772" height="88" rx="18" fill="rgba(0,0,0,.18)" stroke="rgba(255,255,255,.12)"/>
+            <text x="28" y="34" font-size="14" fill="rgba(255,255,255,.70)">Foreign word</text>
+            <text x="28" y="66" font-size="28" font-weight="700" fill="rgba(255,255,255,.95)">manzana</text>
+            <text x="742" y="56" text-anchor="end" font-size="14" fill="rgba(255,255,255,.70)">Click the match →</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section id="how" class="grid3" aria-label="How it works">
+      <div class="card feat">
+        <h3>1) Icons drift</h3>
+        <p>A round spawns a small set of word-icons that float and wander across the stage.</p>
+      </div>
+      <div class="card feat">
+        <h3>2) A foreign word appears</h3>
+        <p>The target word shows at the bottom (with optional hints, audio, and difficulty settings).</p>
+      </div>
+      <div class="card feat">
+        <h3>3) Click the right one</h3>
+        <p>Correct clicks reinforce memory. Wrong clicks teach contrasts. Your streak drives progression.</p>
+      </div>
+    </section>
+
+    <section id="demo" class="card" style="margin-top:18px; overflow:hidden;">
+      <div class="demo" role="region" aria-label="Click-A-Word demo mock">
+        <div class="demoHeader">
+          <div class="left">
+            <span class="chip">Demo</span>
+            <span class="chip">Language: Spanish → English</span>
+            <span class="chip">Difficulty: Beginner</span>
+          </div>
+          <div class="left">
+            <span class="chip">Score: <span id="score">0</span></span>
+            <span class="chip">Streak: <span id="streak">0</span></span>
+          </div>
+        </div>
+
+        <div class="demoStage" id="stage" aria-label="Drifting icons stage"></div>
+
+        <div class="foreignBar" aria-label="Foreign word bar">
+          <div class="foreignWord">
+            <strong id="foreign">manzana</strong>
+            <span id="gloss">Click the icon that means “apple”.</span>
+          </div>
+          <div class="hint">
+            <span class="kbd">Space</span> new word
+            <span class="kbd">R</span> reshuffle
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="grid3" aria-label="FAQ">
+      <div class="card feat">
+        <h3>When does the game launch?</h3>
+        <p>This is a placeholder landing page. Hook it up to your real build when ready.</p>
+      </div>
+      <div class="card feat">
+        <h3>Can it support any language?</h3>
+        <p>Yes—content packs can map words to icons, audio, and spacing intervals.</p>
+      </div>
+      <div class="card feat">
+        <h3>What platforms?</h3>
+        <p>Designed for desktop and mobile. A real release can be web, native, or both.</p>
+      </div>
+    </section>
+
+    <footer class="footer" aria-label="Footer">
+      <div>© <span id="year"></span> Click-A-Word • clickaword.com</div>
+      <div>
+        <a class="pill" href="mailto:hello@clickaword.com?subject=Click-A-Word%20question">Contact</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Placeholder demo logic: drifting tokens + simple “click the matching icon” loop.
+    const stage = document.getElementById("stage");
+    const scoreEl = document.getElementById("score");
+    const streakEl = document.getElementById("streak");
+    const foreignEl = document.getElementById("foreign");
+    const glossEl = document.getElementById("gloss");
+    document.getElementById("year").textContent = String(new Date().getFullYear());
+
+    // Minimal word set (placeholder content)
+    const rounds = [
+      { foreign: "manzana", gloss: "Click the icon that means “apple”.", answer: "apple",
+        tokens: [
+          { emoji:"🍎", label:"apple" }, { emoji:"🐶", label:"dog" },
+          { emoji:"🚗", label:"car" },   { emoji:"🏠", label:"house" }
+        ]},
+      { foreign: "perro", gloss: "Click the icon that means “dog”.", answer: "dog",
+        tokens: [
+          { emoji:"🐶", label:"dog" }, { emoji:"🍎", label:"apple" },
+          { emoji:"🚗", label:"car" }, { emoji:"🏠", label:"house" }
+        ]},
+      { foreign: "casa", gloss: "Click the icon that means “house”.", answer: "house",
+        tokens: [
+          { emoji:"🏠", label:"house" }, { emoji:"🐶", label:"dog" },
+          { emoji:"🍎", label:"apple" }, { emoji:"🚗", label:"car" }
+        ]},
+      { foreign: "coche", gloss: "Click the icon that means “car”.", answer: "car",
+        tokens: [
+          { emoji:"🚗", label:"car" }, { emoji:"🏠", label:"house" },
+          { emoji:"🐶", label:"dog" }, { emoji:"🍎", label:"apple" }
+        ]},
+    ];
+
+    let idx = 0;
+    let score = 0;
+    let streak = 0;
+
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+
+    function clearStage(){
+      while(stage.firstChild) stage.removeChild(stage.firstChild);
+    }
+
+    function placeAndDrift(el){
+      const rect = stage.getBoundingClientRect();
+      // base position
+      const x0 = rand(10, Math.max(10, rect.width  - 90));
+      const y0 = rand(10, Math.max(10, rect.height - 110));
+      // drift target
+      const x1 = Math.max(0, Math.min(rect.width  - 90, x0 + rand(-140, 140)));
+      const y1 = Math.max(0, Math.min(rect.height - 110, y0 + rand(-120, 120)));
+      const dur = rand(3.5, 7.5).toFixed(2) + "s";
+      const delay = (-rand(0, 2.0)).toFixed(2) + "s";
+
+      el.style.setProperty("--x0", x0.toFixed(0) + "px");
+      el.style.setProperty("--y0", y0.toFixed(0) + "px");
+      el.style.setProperty("--x1", x1.toFixed(0) + "px");
+      el.style.setProperty("--y1", y1.toFixed(0) + "px");
+      el.style.setProperty("--dur", dur);
+      el.style.setProperty("--delay", delay);
+      el.classList.add("drift");
+    }
+
+    function renderRound(){
+      clearStage();
+      const r = rounds[idx % rounds.length];
+      foreignEl.textContent = r.foreign;
+      glossEl.textContent = r.gloss;
+
+      r.tokens.forEach(t => {
+        const token = document.createElement("div");
+        token.className = "token";
+        token.setAttribute("role", "button");
+        token.setAttribute("tabindex", "0");
+        token.setAttribute("aria-label", `Click: ${t.label}`);
+
+        const emoji = document.createElement("div");
+        emoji.className = "emoji";
+        emoji.textContent = t.emoji;
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = t.label;
+
+        token.appendChild(emoji);
+        token.appendChild(label);
+
+        token.addEventListener("click", () => onPick(t.label));
+        token.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(t.label); }
+        });
+
+        stage.appendChild(token);
+        placeAndDrift(token);
+      });
+    }
+
+    function onPick(label){
+      const r = rounds[idx % rounds.length];
+      if (label === r.answer) {
+        score += 10;
+        streak += 1;
+      } else {
+        streak = 0;
+      }
+      scoreEl.textContent = String(score);
+      streakEl.textContent = String(streak);
+      idx += 1;
+      renderRound();
+    }
+
+    function reshuffle(){
+      // reset drift parameters only
+      [...stage.children].forEach(placeAndDrift);
+    }
+
+    // Keyboard shortcuts for the placeholder demo
+    window.addEventListener("keydown", (e) => {
+      if (e.key === " "){ e.preventDefault(); idx += 1; renderRound(); }
+      if (e.key.toLowerCase() === "r"){ reshuffle(); }
+    });
+
+    // Initial render (defer to allow layout)
+    setTimeout(renderRound, 60);
+    window.addEventListener("resize", () => setTimeout(reshuffle, 60));
+  </script>
+</body>
+</html>
